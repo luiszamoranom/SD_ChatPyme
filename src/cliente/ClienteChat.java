@@ -1,6 +1,9 @@
 package cliente;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -129,7 +132,8 @@ public class ClienteChat {
                                 System.out.println("Se logueará como admin");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("admin");
+                                ejecutarInterfazAdmin();
+                                
 
                             } else if (rut.startsWith("10")) {
                                 System.out.println("Se logueará como medico");
@@ -177,14 +181,14 @@ public class ClienteChat {
                     }
                     else{
                         marco.setVisible(false);
-                        abrirVentanaCambioContrasena(rut);
+                        abrirVentanaCambioContrasena(rut, false, marco);
                     }
                 }
             });
             
         }
 
-        private void abrirVentanaCambioContrasena(String rut) {
+        private void abrirVentanaCambioContrasena(String rut, Boolean admin, JFrame marco) {
             JFrame marcoCambioContrasena = new JFrame("Cambiar Contraseña");
             marcoCambioContrasena.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             marcoCambioContrasena.setSize(1000, 500);
@@ -199,6 +203,12 @@ public class ClienteChat {
             panelCambioContrasena.add(etiquetaRut, c);
         
             JTextField campoRut = new JTextField(20);
+            //si el usuario no es admin, el campo de rut no se puede editar
+            if(!admin){
+                campoRut.setText(rut);
+                campoRut.setEditable(false);
+            }
+
             c.gridx = 1;
             c.gridy = 0;
             panelCambioContrasena.add(campoRut, c);
@@ -279,7 +289,8 @@ public class ClienteChat {
                     } else {
                         if(validarRut(rut)){//se debe agregar la validacion de que el rut exista en la base de datos
                             System.out.println("Se cambiará la contraseña");//aqui se hara el cambio de contraseña y se redireccionara al login nuevamente
-                            crearInterfazLogin();
+                            //volver al marco anterior
+                            marco.setVisible(true);
                             marcoCambioContrasena.setVisible(false);
                         }
                         else{
@@ -299,7 +310,234 @@ public class ClienteChat {
         crearInterfazGrafica();
         escucharMensajes();
         }
-    
+
+
+        //crea una interfaz para el administrador, contiene cajas para la muestra de estadisticas y 2 botones para la creacion de usuarios y la modificacion de contraseñas
+        private void ejecutarInterfazAdmin() {
+            JFrame marco = new JFrame("Administrador");
+            marco.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            marco.setSize(1000, 500);
+        
+            JPanel panel = new JPanel();
+            panel.setLayout(new GridBagLayout());
+        
+            GridBagConstraints c = new GridBagConstraints();
+            c.insets = new Insets(5, 5, 5, 5);
+
+           //agrega una caja para mostrar estadisticas
+            JPanel panelEstadisticas = new JPanel();
+            panelEstadisticas.setLayout(new GridBagLayout());
+            c.gridx = 0;
+            c.gridy = 0;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panel.add(panelEstadisticas, c);
+
+            //agrega estadisticas de prueba, los casos son cuantos mensajes por grupo se han enviado
+            JLabel etiquetaEstadisticas = new JLabel("Estadísticas");
+            c.gridx = 0;
+            c.gridy = 0;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panelEstadisticas.add(etiquetaEstadisticas, c);
+
+            //PRUEBA DE CONCEPTO DE COMO SE PODRIAN VER LAS ESTADISTICAS, NO ES NECESARIO QUE SE VEA ASI
+            Box cajaEstadisticas = Box.createHorizontalBox();
+            cajaEstadisticas.add(new JLabel("Doctores: 1000"));
+            cajaEstadisticas.add(Box.createHorizontalStrut(10));
+            cajaEstadisticas.add(new JLabel("Auxiliares: 1000"));
+            cajaEstadisticas.add(Box.createHorizontalStrut(10));
+            cajaEstadisticas.add(new JLabel("Admisión: 1000"));
+            cajaEstadisticas.add(Box.createHorizontalStrut(10));
+            cajaEstadisticas.add(new JLabel("Exámenes: 1000"));
+            cajaEstadisticas.add(Box.createHorizontalStrut(10));
+            cajaEstadisticas.add(new JLabel("Pabellón: 1000"));
+            cajaEstadisticas.add(Box.createHorizontalStrut(10));
+            c.gridx = 0;
+            c.gridy = 1;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panelEstadisticas.add(cajaEstadisticas, c);
+
+            //borde con puntos y titulo para separar las estadisticas de los botones
+            Border borde = BorderFactory.createDashedBorder(Color.BLACK, 1, 5, 5, false);
+            TitledBorder titulo = BorderFactory.createTitledBorder(borde, "Estadísticas");
+            titulo.setTitleJustification(TitledBorder.CENTER);
+            panelEstadisticas.setBorder(titulo);
+            
+
+            //agrega 2 botones para crear usuarios y modificar contraseñas
+            JButton botonCrearUsuario = new JButton("Crear Usuario");
+            c.gridx = 0;
+            c.gridy = 1;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panel.add(botonCrearUsuario, c);
+
+            JButton botonModificarContrasena = new JButton("Modificar Contraseña");
+            c.gridx = 0;
+            c.gridy = 2;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panel.add(botonModificarContrasena, c);
+
+            marco.add(panel);
+            marco.setLocationRelativeTo(null);
+            marco.setVisible(true);
+        
+            botonCrearUsuario.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    marco.setVisible(false);
+                    ejecutarInterfazCrearUsuario(marco);
+                }
+            });
+        
+            botonModificarContrasena.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    marco.setVisible(false);
+                    abrirVentanaCambioContrasena("", true, marco);
+                }
+            });
+        }
+
+        //interfaz para la creacion de usuarios, contiene cajas para ingresar los datos del usuario, rut, nombre, correo y combo box para seleccionar el tipo de usuario
+        private void ejecutarInterfazCrearUsuario(JFrame admin) {
+            JFrame marco = new JFrame("Crear Usuario");
+            marco.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            marco.setSize(1000, 500);
+        
+            JPanel panel = new JPanel();
+            panel.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.insets = new Insets(5, 5, 5, 5);
+        
+            JLabel etiquetaRut = new JLabel("RUT:");
+            c.gridx = 0;
+            c.gridy = 0;
+            panel.add(etiquetaRut, c);
+        
+            JTextField campoRut = new JTextField(20);
+            c.gridx = 1;
+            c.gridy = 0;
+            panel.add(campoRut, c);
+        
+            JLabel ejemploRut = new JLabel("Ejemplo: 12.345.678-9");
+            c.gridx = 2;
+            c.gridy = 0;
+            panel.add(ejemploRut, c);
+        
+            JLabel etiquetaNombre = new JLabel("Nombre:");
+            c.gridx = 0;
+            c.gridy = 1;
+            panel.add(etiquetaNombre, c);
+        
+            JTextField campoNombre = new JTextField(20);
+            c.gridx = 1;
+            c.gridy = 1;
+            panel.add(campoNombre, c);
+        
+            JLabel etiquetaCorreo = new JLabel("Correo:");
+            c.gridx = 0;
+            c.gridy = 2;
+            panel.add(etiquetaCorreo, c);
+        
+            JTextField campoCorreo = new JTextField(20);
+            c.gridx = 1;
+            c.gridy = 2;
+            panel.add(campoCorreo, c);
+        
+            JLabel etiquetaTipoUsuario = new JLabel("Tipo de Usuario:");
+            c.gridx = 0;
+            c.gridy = 3;
+            panel.add(etiquetaTipoUsuario, c);
+        
+            JComboBox<Object> cajaSeleccion = new JComboBox<Object>();
+            cajaSeleccion.addItem("Médico");
+            cajaSeleccion.addItem("Admisión");
+            cajaSeleccion.addItem("Auxiliar");
+            cajaSeleccion.addItem("Exámenes");
+            cajaSeleccion.addItem("Pabellón");
+            c.gridx = 1;
+            c.gridy = 3;
+            panel.add(cajaSeleccion, c);
+        
+            JButton botonCrearUsuario = new JButton("Crear Usuario");
+            c.gridx = 0;
+            c.gridy = 4;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+
+            panel.add(botonCrearUsuario, c);
+
+            JLabel mensajeRutInvalido = new JLabel("RUT inválido o ya existe");
+            mensajeRutInvalido.setForeground(Color.RED); // Color rojo para resaltar el mensaje
+            c.gridx = 0;
+            c.gridy = 5;
+            panel.add(mensajeRutInvalido, c);
+            mensajeRutInvalido.setVisible(false);
+
+            JLabel mensajeCamposVacios = new JLabel("Debe completar todos los campos");
+            mensajeCamposVacios.setForeground(Color.RED); // Color rojo para resaltar el mensaje
+            c.gridx = 0;
+            c.gridy = 5;
+            panel.add(mensajeCamposVacios, c);
+            mensajeCamposVacios.setVisible(false);
+
+            //se agrega un boton para volver a la interfaz de administrador
+            JButton botonVolver = new JButton("Volver");
+            c.gridx = 0;
+            c.gridy = 6;
+            c.gridwidth = 2;
+            c.anchor = GridBagConstraints.CENTER;
+            panel.add(botonVolver, c);
+
+        
+
+            marco.add(panel);
+            marco.setLocationRelativeTo(null);
+            marco.setVisible(true);
+
+
+            botonCrearUsuario.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String rut = campoRut.getText();
+                    String nombre = campoNombre.getText();
+                    String correo = campoCorreo.getText();
+                    String tipoUsuario = cajaSeleccion.getSelectedItem().toString();
+                    mensajeRutInvalido.setVisible(false);
+                    mensajeCamposVacios.setVisible(false);
+                    if (rut.isEmpty() || nombre.isEmpty() || correo.isEmpty()) {
+                        // Al menos uno de los campos está vacío
+                        mensajeCamposVacios.setVisible(true);
+                    } else {
+                        if(validarRut(rut)){//se debe agregar la validacion de que el rut no exista en la base de datos
+                            System.out.println("Se creará el usuario");//aqui se hara la creacion del usuario
+                            
+                            //FALTA LOGICA PARA CREAR USUARIO EN LA BASE DE DATOS
+
+                            admin.setVisible(true);//se hara visible la interfaz de administrador nuevamente
+                            marco.setVisible(false);
+                        }
+                        else{
+                            mensajeRutInvalido.setVisible(true);
+                        }
+                    }
+                }
+            });
+
+            botonVolver.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    admin.setVisible(true);
+                    marco.setVisible(false);
+                }
+            });
+        }
+
+
         
     
     /*private void crearInterfazLogin() {
