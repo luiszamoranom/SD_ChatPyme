@@ -4,11 +4,14 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import modelo.Usuario;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -16,6 +19,8 @@ import java.net.Socket;
 * @author RPVZ
 */
 public class ClienteChat {
+    private Usuario usuario;
+    
     private Socket socket;
     private DataInputStream entradaDatos;
     private DataOutputStream salidaDatos;
@@ -32,6 +37,9 @@ public class ClienteChat {
     public ClienteChat() {
         try {
             socket = new Socket("localhost", 5000);
+            
+            usuario = Usuario.getInstance();
+
             entradaDatos = new DataInputStream(socket.getInputStream());
             salidaDatos = new DataOutputStream(socket.getOutputStream());
             crearInterfazLogin();
@@ -129,45 +137,89 @@ public class ClienteChat {
                         if (validarRut(rut)) {
                             if (rut.startsWith("00")) {//habria que implementar las validaciones para ver si la cuenta existe o no y que su  contraseña sea la correcta
                                 // Redireccionar a vista administrador
+
+                                usuario.setTipo_usuario("Administrador");
+
                                 System.out.println("Se logueará como admin");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
+                                usuario.setRut(rut);
+                                usuario.setLogueado(true);
                                 ejecutarInterfazAdmin();
                                 
 
                             } else if (rut.startsWith("10")) {
+                                Usuario.getInstance().setTipo_usuario("Medico");
+                                Usuario.getInstance().setRut(rut);
+
+                                usuario.setTipo_usuario("Medico");
                                 System.out.println("Se logueará como medico");
+                                usuario.setRut(rut);
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("medico");
-                                // Redireccionar a vista medico
+                                usuario.setLogueado(true);
+
+                                try {
+                                    ejecutarInterfaz("medico");
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
 
                             } else if (rut.startsWith("20")) {
+                                usuario.setTipo_usuario("Admision");
+
                                 System.out.println("Se logueará como admision");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("admision");
+                                usuario.setRut(rut);
+                                try {
+                                    ejecutarInterfaz("admision");
+                                } catch (IOException e1) {
+                                    // TODO Auto-generated catch block
+                                    e1.printStackTrace();
+                                }
                                 // Redireccionar a vista admision
 
                             } else if (rut.startsWith("30")) {
+                                usuario.setTipo_usuario("Auxiliar");
                                 System.out.println("Se logueará como auxiliar");
+                                usuario.setRut(rut);
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("auxiliar");
-                                // Redireccionar a vista auxiliar
+                                usuario.setLogueado(true);
+
+                                try {
+                                    ejecutarInterfaz("auxiliar");
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
 
                             } else if (rut.startsWith("40")) {
+                                usuario.setTipo_usuario("Examenes");
+
                                 System.out.println("Se logueará como examenes");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("examenes");
+                                try {
+                                    ejecutarInterfaz("examenes");
+                                } catch (IOException e1) {
+                                    // TODO Auto-generated catch block
+                                    e1.printStackTrace();
+                                }
                                 // Redireccionar a vista examenes
 
                             } else if (rut.startsWith("50")) {  
+                                usuario.setTipo_usuario("Pabellon");
+
                                 System.out.println("Se logueará como pabellon");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz("pabellon");
+                                try {
+                                    ejecutarInterfaz("pabellon");
+                                } catch (IOException e1) {
+                                    // TODO Auto-generated catch block
+                                    e1.printStackTrace();
+                                }
                                 // Redireccionar a vista pabellon   
 
                             } else  {
@@ -304,11 +356,14 @@ public class ClienteChat {
             String regex = "^\\d{1,3}(\\.\\d{3})*-\\d|k|K$"; // Acepta formato con puntos y guión
             return rut.matches(regex);
         }
-        public void ejecutarInterfaz(String rol){
-        this.logueado=true;
-        this.tipo_usuario=rol;
-        crearInterfazGrafica();
-        escucharMensajes();
+
+        public void ejecutarInterfaz(String rol) throws IOException{
+            this.logueado=true;
+            this.tipo_usuario=rol;
+            crearInterfazGrafica();
+            salidaDatos.writeUTF("Tu thread id es: " + usuario.getRut() +" y tu tipo de usuario es: "+usuario.getTipo_usuario());
+            salidaDatos.writeUTF("Selecciona en el panel lateral izquierdo '*' si deseas enviar un mensaje a todos o el id del thread si deseas enviar un mensaje privado");
+            escucharMensajes();
         }
 
 
@@ -588,7 +643,7 @@ public class ClienteChat {
 
         cajaSeleccion = new JComboBox<Object>();  
         cajaSeleccion.addItem("*");   
-        if(tipo_usuario=="admin"){
+        if(usuario.getTipo_usuario().equals("Medico")){
             cajaSeleccion.addItem("doctores");
             cajaSeleccion.addItem("auxiliares");
             cajaSeleccion.addItem("admision"); 
@@ -644,7 +699,7 @@ public class ClienteChat {
                                 String[] ids = mensaje.split(" ");
                                 cajaSeleccion.removeAllItems();
                                 cajaSeleccion.addItem("*"); 
-                                if(tipo_usuario=="admin"){
+                                if(usuario.getTipo_usuario().equals("Medico")){
                                     cajaSeleccion.addItem("doctores");
                                     cajaSeleccion.addItem("auxiliares");
                                     cajaSeleccion.addItem("admision"); 

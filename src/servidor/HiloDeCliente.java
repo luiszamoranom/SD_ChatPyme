@@ -6,13 +6,16 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
 
+import modelo.Usuario;
+
 /**
 *
 * @author RPVZ
 */
 public class HiloDeCliente implements Runnable {
+    private Usuario usuario;
+
     private int id;
-    private String tipo_usuario;
     private Socket socket;
     private DataInputStream entradaDatos;
     DataOutputStream salidaDatos;
@@ -20,8 +23,8 @@ public class HiloDeCliente implements Runnable {
 
     public HiloDeCliente(int id, String tipo_usuario, Socket socket, List<HiloDeCliente> clientesActivos) {
         this.id = id;
-        this.tipo_usuario = tipo_usuario;
         this.socket = socket;
+        usuario = Usuario.getInstance();
         this.clientesActivos = clientesActivos;
         try {
             entradaDatos = new DataInputStream(socket.getInputStream());
@@ -35,34 +38,41 @@ public class HiloDeCliente implements Runnable {
         return id;
     }
 
-    public String getTipoUsuario(){
-        return tipo_usuario;
+    public Usuario getUsuario() {
+        return this.usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     @Override
     public void run() {
-        try {
-            while (true) {
-                String texto = entradaDatos.readUTF();
-                if (texto.startsWith("/privado")) {
-                    String[] partes = texto.split(" ", 3);
-                    int idDestino = Integer.parseInt(partes[1]);
-                    String mensajePrivado = partes[2];
-                    enviarMensajePrivado(idDestino, mensajePrivado);
-                } else if(texto.startsWith("/auxiliares")){
-                    String[] partes = texto.split(" ", 2);
-                    String mensajePrivado = partes[1];
-                    enviarMensajeAuxiliares(mensajePrivado);
-                }else {
-                    enviarMensajeATodos(texto);
+
+            try {
+                while (true) {
+                    System.out.println(Usuario.getInstance().toString());
+                    String texto = entradaDatos.readUTF();
+                    if (texto.startsWith("/privado")) {
+                        String[] partes = texto.split(" ", 3);
+                        int idDestino = Integer.parseInt(partes[1]);
+                        String mensajePrivado = partes[2];
+                        enviarMensajePrivado(idDestino, mensajePrivado);
+                    } else if(texto.startsWith("/auxiliares")){
+                        String[] partes = texto.split(" ", 2);
+                        String mensajePrivado = partes[1];
+                        enviarMensajeAuxiliares(mensajePrivado);
+                    }else {
+                        enviarMensajeATodos(texto);
+                    }
                 }
+            } catch (SocketException e) {
+                System.out.println("Cliente con ID " + this.id + " se ha desconectado.");
+                clientesActivos.remove(this);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (SocketException e) {
-            System.out.println("Cliente con ID " + this.id + " se ha desconectado.");
-            clientesActivos.remove(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        
     }
 
     public void enviarMensajePrivado(int idDestino, String mensaje) {
@@ -86,9 +96,9 @@ public class HiloDeCliente implements Runnable {
 
     public void enviarMensajeAuxiliares(String mensaje) {
         for (HiloDeCliente cliente : clientesActivos) {
-            if (cliente.getTipoUsuario().equals("auxiliar") ) {
+            if (usuario.getTipo_usuario().equals("Auxiliar") ) {
                 try {
-                    cliente.salidaDatos.writeUTF("Mensaje a auxiliares de " +this.tipo_usuario+" "+ this.id + ": " + mensaje);
+                    cliente.salidaDatos.writeUTF("Mensaje a auxiliares de " +usuario.getTipo_usuario()+" "+ this.id + ": " + mensaje);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

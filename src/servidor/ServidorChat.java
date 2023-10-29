@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import modelo.Usuario;
+
 /**
 *
 @author RPVZ
@@ -23,23 +25,23 @@ public class ServidorChat {
             while (true) {
                 Socket cliente = socketServidor.accept();
 
-                String[] roles = {"doctor", "auxiliar"};
-                Random rand = new Random();
-                int index = rand.nextInt(roles.length);
-                String randomRol = roles[index];
-
+ 
+                String randomRol="borrar";
 
                 HiloDeCliente nuevoCliente = new HiloDeCliente(clientesActivos.size(),randomRol, cliente, clientesActivos);
                 clientesActivos.add(nuevoCliente);
                 Thread hilo = new Thread(nuevoCliente);
                 hilo.start();
 
+                /*
                 try {
+                    System.out.println("Escribió los datos");
                     nuevoCliente.salidaDatos.writeUTF("Tu thread id es: " + nuevoCliente.getId() +" y tu tipo de usuario es: "+nuevoCliente.getTipoUsuario());
                     nuevoCliente.salidaDatos.writeUTF("Selecciona en el panel lateral izquierdo '*' si deseas enviar un mensaje a todos o el id del thread si deseas enviar un mensaje privado");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                */
 
                 actualizarListaClientes();
             }
