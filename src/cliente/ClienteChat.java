@@ -102,6 +102,7 @@ public class ClienteChat {
             c.gridx = 2;
             c.gridy = 2; // Ubicado en la misma fila que el botón
             panel.add(checkBox, c);
+            checkBox.setSelected(true); 
 
             JLabel mensajeRutInvalido = new JLabel("RUT inválido,no existe o contraseña incorrecta");
             mensajeRutInvalido.setForeground(Color.RED); // Color rojo para resaltar el mensaje
@@ -125,28 +126,44 @@ public class ClienteChat {
                         if (validarRut(rut)) {
                             if (rut.startsWith("00")) {//habria que implementar las validaciones para ver si la cuenta existe o no y que su  contraseña sea la correcta
                                 // Redireccionar a vista administrador
+                                System.out.println("Se logueará como admin");
                                 mensajeRutInvalido.setVisible(false);
                                 marco.setVisible(false);
-                                ejecutarInterfaz();
+                                ejecutarInterfaz("admin");
 
                             } else if (rut.startsWith("10")) {
+                                System.out.println("Se logueará como medico");
                                 mensajeRutInvalido.setVisible(false);
+                                marco.setVisible(false);
+                                ejecutarInterfaz("medico");
                                 // Redireccionar a vista medico
 
                             } else if (rut.startsWith("20")) {
+                                System.out.println("Se logueará como admision");
                                 mensajeRutInvalido.setVisible(false);
+                                marco.setVisible(false);
+                                ejecutarInterfaz("admision");
                                 // Redireccionar a vista admision
 
                             } else if (rut.startsWith("30")) {
+                                System.out.println("Se logueará como auxiliar");
                                 mensajeRutInvalido.setVisible(false);
+                                marco.setVisible(false);
+                                ejecutarInterfaz("auxiliar");
                                 // Redireccionar a vista auxiliar
 
                             } else if (rut.startsWith("40")) {
+                                System.out.println("Se logueará como examenes");
                                 mensajeRutInvalido.setVisible(false);
+                                marco.setVisible(false);
+                                ejecutarInterfaz("examenes");
                                 // Redireccionar a vista examenes
 
                             } else if (rut.startsWith("50")) {  
+                                System.out.println("Se logueará como pabellon");
                                 mensajeRutInvalido.setVisible(false);
+                                marco.setVisible(false);
+                                ejecutarInterfaz("pabellon");
                                 // Redireccionar a vista pabellon   
 
                             } else  {
@@ -262,6 +279,8 @@ public class ClienteChat {
                     } else {
                         if(validarRut(rut)){//se debe agregar la validacion de que el rut exista en la base de datos
                             System.out.println("Se cambiará la contraseña");//aqui se hara el cambio de contraseña y se redireccionara al login nuevamente
+                            crearInterfazLogin();
+                            marcoCambioContrasena.setVisible(false);
                         }
                         else{
                             mensajeRutInvalido.setVisible(true);
@@ -274,9 +293,9 @@ public class ClienteChat {
             String regex = "^\\d{1,3}(\\.\\d{3})*-\\d|k|K$"; // Acepta formato con puntos y guión
             return rut.matches(regex);
         }
-        public void ejecutarInterfaz(){
+        public void ejecutarInterfaz(String rol){
         this.logueado=true;
-        this.tipo_usuario="admin";
+        this.tipo_usuario=rol;
         crearInterfazGrafica();
         escucharMensajes();
         }
@@ -388,7 +407,7 @@ public class ClienteChat {
                                 cajaSeleccion.removeAllItems();
                                 cajaSeleccion.addItem("*"); 
                                 if(tipo_usuario=="admin"){
-                                     cajaSeleccion.addItem("doctores");
+                                    cajaSeleccion.addItem("doctores");
                                     cajaSeleccion.addItem("auxiliares");
                                     cajaSeleccion.addItem("admision"); 
                                     cajaSeleccion.addItem("examenes");
