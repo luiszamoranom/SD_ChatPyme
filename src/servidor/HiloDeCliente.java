@@ -53,7 +53,24 @@ public class HiloDeCliente implements Runnable {
                     String[] partes = texto.split(" ", 2);
                     String mensajePrivado = partes[1];
                     enviarMensajeAuxiliares(mensajePrivado);
-                }else {
+                }else if (texto.startsWith("/admision")){
+                    String[] partes = texto.split(" ", 2);
+                    String mensajePrivado = partes[1];
+                    enviarMensajeAdmision(mensajePrivado);
+                }else if(texto.startsWith("/pabellon")){
+                    String[] partes = texto.split(" ", 2);
+                    String mensajePrivado = partes[1];
+                    enviarMensajePabellon(mensajePrivado);
+                }else if(texto.startsWith("/medico")){
+                    String[] partes = texto.split(" ", 2);
+                    String mensajePrivado = partes[1];
+                    enviarMensajeMedicos(mensajePrivado);
+                }else if(texto.startsWith("/examenes")){
+                    String[] partes = texto.split(" ", 2);
+                    String mensajePrivado = partes[1];
+                    enviarMensajeExamenes(mensajePrivado);
+                }
+                else{
                     enviarMensajeATodos(texto);
                 }
             }
@@ -103,6 +120,87 @@ public class HiloDeCliente implements Runnable {
         }
     }
 
+    //funcion para mandar mensajes a admision
+    public void enviarMensajeAdmision(String mensaje) {
+        for (HiloDeCliente cliente : clientesActivos) {
+            if (cliente.getTipoUsuario().equals("admision") ) {
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje a admision de " +this.tipo_usuario+" "+ this.id + ": " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else if(cliente.equals(this)){
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje de ti a admision: " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    //funcion para mandar mensajes a medicos
+    public void enviarMensajeMedicos(String mensaje) {
+        for (HiloDeCliente cliente : clientesActivos) {
+            if (cliente.getTipoUsuario().equals("medico") ) {
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje a medicos de " +this.tipo_usuario+" "+ this.id + ": " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else if(cliente.equals(this)){
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje de ti a medicos: " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    //funcion para mandar mensajes a pabellon
+    public void enviarMensajePabellon(String mensaje) {
+        for (HiloDeCliente cliente : clientesActivos) {
+            if (cliente.getTipoUsuario().equals("pabellon") ) {
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje a pabellon de " +this.tipo_usuario+" "+ this.id + ": " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else if(cliente.equals(this)){
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje de ti a pabellon: " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    //funcion para mandar mensajes a examenes
+    public void enviarMensajeExamenes(String mensaje) {
+        for (HiloDeCliente cliente : clientesActivos) {
+            if (cliente.getTipoUsuario().equals("examenes") ) {
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje a examenes de " +this.tipo_usuario+" "+ this.id + ": " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else if(cliente.equals(this)){
+                try {
+                    cliente.salidaDatos.writeUTF("Mensaje de ti a examenes: " + mensaje);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    //funcion para mandar mensajes a todos
     public void enviarMensajeATodos(String mensaje) {
         for (HiloDeCliente cliente : clientesActivos) {
             try {

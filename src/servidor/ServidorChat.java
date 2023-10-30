@@ -1,5 +1,6 @@
 package servidor;
 
+import java.io.DataInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,14 +23,15 @@ public class ServidorChat {
             ServerSocket socketServidor = new ServerSocket(5000);
             while (true) {
                 Socket cliente = socketServidor.accept();
+                DataInputStream inFromClient = new DataInputStream(cliente.getInputStream());
+                String initialMessage = inFromClient.readUTF();
+                System.out.println(initialMessage);
 
-                String[] roles = {"doctor", "auxiliar"};
-                Random rand = new Random();
-                int index = rand.nextInt(roles.length);
-                String randomRol = roles[index];
+                //separamos el mensaje inicial para obtener el tipo de usuario
+                String[] parts = initialMessage.split(":");
+                String tipoUsuario = parts[1];
 
-
-                HiloDeCliente nuevoCliente = new HiloDeCliente(clientesActivos.size(),randomRol, cliente, clientesActivos);
+                HiloDeCliente nuevoCliente = new HiloDeCliente(clientesActivos.size(),tipoUsuario, cliente, clientesActivos);
                 clientesActivos.add(nuevoCliente);
                 Thread hilo = new Thread(nuevoCliente);
                 hilo.start();

@@ -31,14 +31,23 @@ public class ClienteChat {
 
     public ClienteChat() {
         try {
-            socket = new Socket("localhost", 5000);
-            entradaDatos = new DataInputStream(socket.getInputStream());
-            salidaDatos = new DataOutputStream(socket.getOutputStream());
             crearInterfazLogin();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    public void iniciarConexion(String role) {
+        try {
+            socket = new Socket("localhost", 5000);
+            entradaDatos = new DataInputStream(socket.getInputStream());
+            salidaDatos = new DataOutputStream(socket.getOutputStream());
+            // mandar rol al servidor
+            salidaDatos.writeUTF("role:" + role);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
    /* OMAR
          * Quiero dos campos que sea para rut y contraseña y
          * si el rut empieza con:
@@ -307,6 +316,7 @@ public class ClienteChat {
         public void ejecutarInterfaz(String rol){
         this.logueado=true;
         this.tipo_usuario=rol;
+        iniciarConexion(rol);
         crearInterfazGrafica();
         escucharMensajes();
         }
@@ -608,10 +618,23 @@ public class ClienteChat {
                             salidaDatos.writeUTF(mensaje);
                         }else if (elementoSeleccionado instanceof String && "auxiliares".equals(elementoSeleccionado.toString())) {
                              salidaDatos.writeUTF("/auxiliares " + mensaje);
-                        }else if (elementoSeleccionado instanceof Integer) {
+                        }else if(elementoSeleccionado instanceof String && "medico".equals(elementoSeleccionado.toString())) {
+                            salidaDatos.writeUTF("/medico " + mensaje);
+                        }
+                        else if(elementoSeleccionado instanceof String && "admision".equals(elementoSeleccionado.toString())) {
+                            salidaDatos.writeUTF("/admision " + mensaje);
+                        }
+                        else if(elementoSeleccionado instanceof String && "examenes".equals(elementoSeleccionado.toString())) {
+                            salidaDatos.writeUTF("/examenes " + mensaje);
+                        }
+                        else if(elementoSeleccionado instanceof String && "pabellon".equals(elementoSeleccionado.toString())) {
+                            salidaDatos.writeUTF("/pabellon " + mensaje);
+                        }
+                        else if (elementoSeleccionado instanceof Integer) {
                             int idDestino = (int) elementoSeleccionado;
                             salidaDatos.writeUTF("/privado " + idDestino + " " + mensaje);
                         }
+                        
                         campoTexto.setText("");
                     } else {
                         System.out.println("No hay destinatarios disponibles.");
@@ -644,13 +667,45 @@ public class ClienteChat {
                                 String[] ids = mensaje.split(" ");
                                 cajaSeleccion.removeAllItems();
                                 cajaSeleccion.addItem("*"); 
-                                if(tipo_usuario=="admin"){
-                                    cajaSeleccion.addItem("doctores");
+                                if(tipo_usuario=="administrador"){
+                                    cajaSeleccion.addItem("medico");
                                     cajaSeleccion.addItem("auxiliares");
                                     cajaSeleccion.addItem("admision"); 
                                     cajaSeleccion.addItem("examenes");
                                     cajaSeleccion.addItem("pabellon"); 
                                 } 
+
+                                //para tipo usuario medico
+                                if (tipo_usuario=="medico") {
+                                    cajaSeleccion.addItem("medico");
+                                    cajaSeleccion.addItem("auxiliares");
+                                    cajaSeleccion.addItem("admision"); 
+                                    cajaSeleccion.addItem("examenes");
+                                    cajaSeleccion.addItem("pabellon"); 
+                                    
+                                } else if (tipo_usuario=="auxiliares") {
+                                    cajaSeleccion.addItem("auxiliares");
+; 
+                                    
+                                } else if (tipo_usuario=="admision") {
+                                    cajaSeleccion.addItem("admision"); 
+                                    cajaSeleccion.addItem("examenes");
+                                    cajaSeleccion.addItem("pabellon"); 
+                                    
+                                } else if (tipo_usuario=="examenes") {
+                                    cajaSeleccion.addItem("admision"); 
+                                    cajaSeleccion.addItem("examenes");
+                                    cajaSeleccion.addItem("pabellon"); 
+                                    
+                                } else if (tipo_usuario=="pabellon") {
+                                    cajaSeleccion.addItem("admision"); 
+                                    cajaSeleccion.addItem("examenes");
+                                    cajaSeleccion.addItem("pabellon"); 
+                                    
+                                }
+                                    
+                               
+
                                 for (int i = 1; i < ids.length; i++) {
                                     cajaSeleccion.addItem(Integer.parseInt(ids[i]));
                                 }
